@@ -1,15 +1,18 @@
+#Necessary built-in modules
+import random
+import os
+#Pytorch modules
 import numpy as np
 import torch
-import random
 from torch import nn
 from torch import optim
 import torch.nn.functional as F
-import os
 from torchvision import datasets, transforms, models
-from add_image_to_background import get_image
 from torch.utils.data import Dataset, DataLoader
-#import hoop_dataset
+#PIL modules
 from PIL import Image
+#Pre-written modules
+from UMD PRG Hoop Recognition Model/Image Transformation Modules/generate_hoop_image.py
 
 #Generate hoop
 hoop = transform_image(Image.open("assets/hoops/hoop1.png"))
