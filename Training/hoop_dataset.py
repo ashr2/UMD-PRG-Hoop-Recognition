@@ -1,16 +1,22 @@
+#Built-in modules
 import numpy as np
 import random
+import os
+import sys
+#Pytorch modules
 import torch
 from torch import nn
 from torch import optim
 import torch.nn.functional as F
-import os
-from PIL import Image
 import torchvision.transforms as T
 from torchvision import datasets, transforms, models
-from add_image_to_background import get_image
 from torch.utils.data import Dataset, DataLoader
-from tranforms import transform_image
+#Image modules
+from PIL import Image
+#Prewritten modules
+sys.path.append('/image_transformations') 
+from image_transformations import generate_hoop_image
+from image_transformations import generate_training_data
 
 class HoopDataset(Dataset):
     """Face Landmarks dataset."""
@@ -36,7 +42,7 @@ class HoopDataset(Dataset):
             background = ".DS_Store"
             while(background == ".DS_Store"):
                 background = random.choice(self.backgrounds)
-            data = get_image(Image.open(background_dir + "/" + background), Image.open(hoop_dir + "/" + hoop))
+            data = generate_training_data.add_hoop_to_background(Image.open(background_dir + "/" + background), Image.open(hoop_dir + "/" + hoop))
             self.__annotations__.append(data[0])
             self.data.append(data[1])
             
