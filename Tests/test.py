@@ -3,6 +3,7 @@ import random
 import os
 import numpy as np
 import sys
+sys.path.append('/training') 
 #Pytorch modules
 import torch
 from torch import nn
