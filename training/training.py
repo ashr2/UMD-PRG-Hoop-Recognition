@@ -13,8 +13,8 @@ transform = transforms.Compose(
 
 batch_size = 4
 
-set = hoop_dataset.HoopDataset(annotation_dir="assets/annotation_images", 
-                               root_dir="assets/background_images", size=60)
+set = hoop_dataset.HoopDataset("/Users/ashwathrajesh/UMD-PRG-Hoop-Recognition/tests/hoops", 
+                               "/Users/ashwathrajesh/UMD-PRG-Hoop-Recognition/assets/unlabeled2017", 60)
 
 trainset = torch.utils.data.Subset(set, range(0, int(len(set) * 0.7)))
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
@@ -23,6 +23,8 @@ trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
 testset = torch.utils.data.Subset(set, range(int(len(set) * 0.7), len(set)))
 testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                          shuffle=False, num_workers=2)
+
+
 
 class AutoEncoder(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -48,45 +50,41 @@ class AutoEncoder(nn.Module):
         # decoded_unpool = self.unpool(F.relu(encoded), indices, output_size=encoded_conv2d_2.size())
         decoded_conv2d_1 = self.decoder_conv2d_1(F.relu(encoded_conv2d_2), output_size=encoded_conv2d_1.size())
         decoded = self.decoder_conv2d_2(F.relu(decoded_conv2d_1), output_size=x.size())
-
         # Use sigmoid to keep output between 0 and 1
         decoded = torch.sigmoid(decoded)
-
         return decoded
     
-encoder = AutoEncoder(in_channels = 3, out_channels = 1)
+# encoder = AutoEncoder(in_channels = 3, out_channels = 1)
 
-#Define loss function and optimizer
-criterion = nn.BCELoss()
-optimizer = optim.SGD(encoder.parameters(), lr=0.001, momentum=0.9)
+# #Define loss function and optimizer
+# criterion = nn.BCELoss()
+# optimizer = optim.SGD(encoder.parameters(), lr=0.001, momentum=0.9)
 
+# for epoch in range(2):  # loop over the dataset multiple times
+#     running_loss = 0.0
+#     for i, data in enumerate(trainloader, 0):
+#         # get the inputs; data is a list of [inputs, labels]
+#         inputs, labels = data
 
-for epoch in range(2):  # loop over the dataset multiple times
+#         # zero the parameter gradients
+#         optimizer.zero_grad()
 
-    running_loss = 0.0
-    for i, data in enumerate(trainloader, 0):
-        # get the inputs; data is a list of [inputs, labels]
-        inputs, labels = data
+#         # forward + backward + optimize
+#         outputs = encoder(inputs)
+#         loss = criterion(outputs, labels)
+#         loss.backward()
+#         optimizer.step()
 
-        # zero the parameter gradients
-        optimizer.zero_grad()
+#         # print statistics
+#         running_loss += loss.item()
+#         if i % 2000 == 1999:    # print every 2000 mini-batches
+#             print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
+#             running_loss = 0.0
 
-        # forward + backward + optimize
-        outputs = encoder(inputs)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
+# print('Finished Training')
 
-        # print statistics
-        running_loss += loss.item()
-        if i % 2000 == 1999:    # print every 2000 mini-batches
-            print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
-            running_loss = 0.0
+# PATH = 'Image Transforms/assets'
+# torch.save(encoder.state_dict(), PATH)
 
-print('Finished Training')
-
-PATH = 'Image Transforms/assets'
-torch.save(encoder.state_dict(), PATH)
-
-dataiter = iter(testloader)
-images, labels = next(dataiter)
+# dataiter = iter(testloader)
+# images, labels = next(dataiter)

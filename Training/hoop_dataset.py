@@ -14,40 +14,52 @@ from torch.utils.data import Dataset, DataLoader
 #Image modules
 from PIL import Image
 #Prewritten modules
-sys.path.append('/image_transformations') 
-from image_transformations import generate_hoop_image
-from image_transformations import generate_training_data
+import generate_training_data
+#import image_transformations 
+# from .generate_hoop_image import transform_image
+# from .generate_training_data import add_hoop_to_background
 
-class HoopDataset(Dataset):
-    """Face Landmarks dataset."""
+class HoopDataset(Dataset): 
 
-    def __init__(self, hoop_dir, background_dir, size, transform=None):
+    def __init__(self, hoop_dir, background_dir, transform=None):
         """
         Args:
             hoop_dir (string): Path to directory with all hoops
             background_dir (string): Path to directory with all backgrounds
-            size (int): number of images in training set
         """
+        self.background_dir = background_dir
+        self.hoop_dir = hoop_dir
         self.hoops = os.listdir(hoop_dir)
         self.backgrounds = os.listdir(background_dir)
+        self.num_backgrounds = len(self.backgrounds)
         self.data = []
+        self.transform = transform
         self.__annotations__ = []
-        #Generate size number of images
-        for i in range(size):
-            #Get base hoop
-            hoop = ".DS_Store"
-            while(hoop == ".DS_Store"):
-                hoop = random.choice(self.hoops)
-            #Get base background
-            background = ".DS_Store"
-            while(background == ".DS_Store"):
-                background = random.choice(self.backgrounds)
-            data = generate_training_data.add_hoop_to_background(Image.open(background_dir + "/" + background), Image.open(hoop_dir + "/" + hoop))
-            self.__annotations__.append(data[0])
-            self.data.append(data[1])
-            
+        
     def __len__(self):
-        return(self.size)
+        return(len(self.data))
 
     def __getitem__(self, idx):
-        return(self.__annotations__[idx], self.data[idx])
+        #Get base hoop
+        hoop = Image.open(self.hoop_dir + "/" + self.hoops[idx % len(self.hoops)])    
+        #Get base background
+        background = Image.open(self.background_dir + "/" + self.backgrounds[idx % self.num_backgrounds])
+        data = generate_training_data.add_hoop_to_background(background, hoop)
+        #transform = transforms.Compose([transforms.Resize((256, 256)), transforms.ToTensor()])
+
+        while(idx >= len(self.__annotations__)):
+            self.__annotations__.append(None)
+            self.data.append(None)
+        self.__annotations__[idx] = data[0]
+        self.data[idx] = data[1]
+        if self.transform is not None:
+            data = [self.transform(item) for item in data]
+
+        tf=transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((512,640)),
+            transforms.ToTensor()
+        ])
+        data[0] = tf(data[0])
+        data[1] = tf(data[1])
+        return(data[0], data[1])
