@@ -21,6 +21,11 @@ class AutoEncoder(nn.Module):
         self.decoder_conv2d_2 = nn.ConvTranspose2d(in_channels=16, out_channels=out_channels,
                                kernel_size=(16, 16), stride=2)
 
+        # torch.nn.init.normal_(self.encoder_conv2d_1.weight)
+        # torch.nn.init.normal_(self.encoder_conv2d_2.weight)
+        # torch.nn.init.normal_(self.decoder_conv2d_1.weight)
+        # torch.nn.init.normal_(self.decoder_conv2d_2.weight)
+
     def forward(self, x):
         # Original
         encoded_conv2d_1 = self.encoder_conv2d_1(x)

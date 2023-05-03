@@ -15,52 +15,69 @@ from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import hoop_dataset
 import encoder
-# import generate_training_data
-# import training
-#Pre-written modules    
-#Create dataset
-# Define custom collate function
-def custom_collate(batch):
-    inputs = []
-    targets = []
-    for item in batch:
-        input_item = item[0]
-        target_item = item[1]
-        if isinstance(input_item, torch.Tensor):
-            input_item = transforms.ToPILImage()(input_item)
-        if isinstance(target_item, torch.Tensor):
-            target_item = transforms.ToPILImage()(target_item)
-        inputs.append(input_item)
-        targets.append(transforms.ToTensor()(target_item))
-    return inputs, targets
+import cv2
+import torchvision
 
+def visualize_sample(image, pred_mask, mask, i):
+    image_numpy     = image.detach().cpu().numpy().transpose(1, 2, 0)
+    pred_mask_numpy = pred_mask.detach().cpu().numpy().transpose(1, 2, 0)
+    mask_numpy      = mask     .detach().cpu().numpy().transpose(1, 2, 0)
+
+    pred_mask_numpy = cv2.cvtColor(pred_mask_numpy, cv2.COLOR_GRAY2BGR)
+    mask_numpy      = cv2.cvtColor(mask_numpy, cv2.COLOR_GRAY2BGR)
+
+    vis_stack = np.hstack((image_numpy, pred_mask_numpy, mask_numpy))
+    vis_stack = cv2.resize(vis_stack, (int(vis_stack.shape[1]/2), int(vis_stack.shape[0]/2)))
+
+    cv2.imshow('sample ' + str(i), vis_stack)
+    cv2.waitKey(1)
+
+device = 'cpu'
+pin_memory = False
+if torch.cuda.is_available():
+    device = 'cuda'
+    pin_memory = True
 
 # Create dataset
-dataset = hoop_dataset.HoopDataset("/Users/ashwathrajesh/UMD-PRG-Hoop-Recognition/tests/hoops", "/Users/ashwathrajesh/UMD-PRG-Hoop-Recognition/assets/unlabeled2017")
-# Pre-load dataset
-for i in range(0,40):
-    dataset[i]
+dataset = hoop_dataset.HoopDataset("../tests/hoops", "../assets/unlabeled2017")
 
 # Set batch size
 batch_size = 1
 
-# Create data loader with custom collate function
-dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=custom_collate)
+# Create data loader
+dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=pin_memory)
 
 # Set up autoencoder and optimizer
-autoencoder = encoder.AutoEncoder(in_channels=1, out_channels=1)
-optimizer = optim.Adam(autoencoder.parameters(), lr=0.001)
+autoencoder = encoder.AutoEncoder(in_channels=3, out_channels=1).to(device)
+
+optimizer = optim.Adam(autoencoder.parameters(), lr=0.0001)
 
 # Train autoencoder
-num_epochs = 10
+num_epochs = 500
+steps_per_print = 1
 for epoch in range(num_epochs):
-    for i, (inputs, labels) in enumerate(dataloader):
-        print(inputs)
-        optimizer.zero_grad()
-        inputs = torch.stack([transforms.ToTensor()(x) for x in inputs])
-        outputs = autoencoder(inputs)
-        loss = F.binary_cross_entropy(outputs, inputs)
-        loss.backward()
-        optimizer.step()
-        if i % 10 == 0:
-            print("Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}".format(epoch+1, num_epochs, i+1, len(dataloader), loss.item()))
+    for i, (real_i, image, mask) in enumerate(dataloader):
+        try:
+            image = image.to(device)
+            mask = mask.to(device)
+
+            optimizer.zero_grad()
+            pred_mask = autoencoder(image)
+
+            image     = torchvision.transforms.functional.crop(image,     top=20, left=20, height=512-40, width=640-40)
+            pred_mask = torchvision.transforms.functional.crop(pred_mask, top=20, left=20, height=512-40, width=640-40)
+            mask      = torchvision.transforms.functional.crop(mask,      top=20, left=20, height=512-40, width=640-40)
+            weight = (mask * 10) + 1
+
+            loss = F.binary_cross_entropy(pred_mask, mask, weight=weight)
+
+            loss.backward()
+            optimizer.step()
+
+            if i % steps_per_print == 0:
+                visualize_sample(image[0], pred_mask[0], mask[0], real_i[0])
+                print("Epoch [{}/{}], Step [{}/{}], Loss: {}".format(epoch+1, num_epochs, i+1, len(dataloader), loss.item()))
+        except:
+            print("Error")
+
+cv2.waitKey(0)
