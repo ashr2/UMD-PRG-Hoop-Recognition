@@ -29,8 +29,8 @@ if torch.cuda.is_available():
     device = 'cuda'
     pin_memory = True
 
-# Create a training set that uses 80% of the images in dataset and a validation set
-# that uses 20% of the images in the dataset
+# Create a training set that uses specified quantity of the images in dataset and a validation set
+# that uses remaining images in the dataset
 dataset = hoop_dataset.HoopDataset("../assets/hoops", "../assets/training_data")
 
 TRAINSET_SIZE = 0.8
