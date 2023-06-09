@@ -15,49 +15,52 @@ from torch.utils.data import Dataset, DataLoader
 #Image modules
 import PIL
 from PIL import Image
+#Transformation modules
+from transformations.generate_hoop_image import transform_image
+from transformations.generate_training_data import add_hoop_to_background
 
-def add_hoop_to_background(background_image, hoop_image):
-    size = random.randint(100,min(background_image.size[1], background_image.size[0])//2)
-    maxsize = (size, size)
-    hoop_image.thumbnail(maxsize, PIL.Image.ANTIALIAS)
+# def add_hoop_to_background(background_image, hoop_image):
+#     size = random.randint(100,min(background_image.size[1], background_image.size[0])//2)
+#     maxsize = (size, size)
+#     hoop_image.thumbnail(maxsize, PIL.Image.ANTIALIAS)
 
-    #Paste hoop onto background
-    x_center = random.randint(hoop_image.size[0], background_image.size[0] - hoop_image.size[0])
-    y_center = random.randint(hoop_image.size[1], background_image.size[1] - hoop_image.size[1])
-    #im.paste(mouse, (40,40), mouse)
-    background_image.paste(hoop_image, (x_center, y_center), hoop_image)
+#     #Paste hoop onto background
+#     x_center = random.randint(hoop_image.size[0], background_image.size[0] - hoop_image.size[0])
+#     y_center = random.randint(hoop_image.size[1], background_image.size[1] - hoop_image.size[1])
+#     #im.paste(mouse, (40,40), mouse)
+#     background_image.paste(hoop_image, (x_center, y_center), hoop_image)
 
-    #Paste hoop onto black background
-    black_image = Image.new("L", background_image.size)
-    hoop_mask = hoop_image.convert("L")
-    black_image.paste(hoop_image, (x_center, y_center))
-    black_image = black_image.crop((0, 0, background_image.size[0], background_image.size[1]))
-    return background_image, black_image
+#     #Paste hoop onto black background
+#     black_image = Image.new("L", background_image.size)
+#     hoop_mask = hoop_image.convert("L")
+#     black_image.paste(hoop_image, (x_center, y_center))
+#     black_image = black_image.crop((0, 0, background_image.size[0], background_image.size[1]))
+#     return background_image, black_image
 
 
-def transform_image(orig_img):
-    transformed_img = orig_img
-    #Rotate image
-    rotater = T.RandomRotation(degrees=(0, 180))
-    rotated_img = [rotater(transformed_img)]
-    transformed_img = rotated_img[0]
+# def transform_image(orig_img):
+#     transformed_img = orig_img
+#     #Rotate image
+#     rotater = T.RandomRotation(degrees=(0, 180))
+#     rotated_img = [rotater(transformed_img)]
+#     transformed_img = rotated_img[0]
 
-    #Flip vertically
-    vflipper = T.RandomVerticalFlip(p=0.5)
-    transformed_imgs = [vflipper(transformed_img)]
-    transformed_img = transformed_imgs[0]
+#     #Flip vertically
+#     vflipper = T.RandomVerticalFlip(p=0.5)
+#     transformed_imgs = [vflipper(transformed_img)]
+#     transformed_img = transformed_imgs[0]
 
-    #Flip horizontally
-    hflipper = T.RandomHorizontalFlip(p=0.5)
-    transformed_imgs = [hflipper(transformed_img)]
-    transformed_img = transformed_imgs[0]
+#     #Flip horizontally
+#     hflipper = T.RandomHorizontalFlip(p=0.5)
+#     transformed_imgs = [hflipper(transformed_img)]
+#     transformed_img = transformed_imgs[0]
 
-    #Perspective image
-    perspective_transformer = T.RandomPerspective(distortion_scale=0.8, p=1.0) #Test distortion scale, play around with it
-    perspective_imgs = [perspective_transformer(transformed_img)]
-    transformed_img = perspective_imgs[0]
+#     #Perspective image
+#     perspective_transformer = T.RandomPerspective(distortion_scale=0.8, p=1.0) #Test distortion scale, play around with it
+#     perspective_imgs = [perspective_transformer(transformed_img)]
+#     transformed_img = perspective_imgs[0]
     
-    return(transformed_img)
+#     return(transformed_img)
 
 class HoopDataset(Dataset): 
 
