@@ -13,8 +13,8 @@ transform = transforms.Compose(
 
 batch_size = 4
 
-set = hoop_dataset.HoopDataset("/Users/ashwathrajesh/UMD-PRG-Hoop-Recognition/tests/hoops", 
-                               "/Users/ashwathrajesh/UMD-PRG-Hoop-Recognition/assets/unlabeled2017", 60)
+set = hoop_dataset.HoopDataset("../assets/hoops", 
+                               "../assets/unlabeled2017")
 
 trainset = torch.utils.data.Subset(set, range(0, int(len(set) * 0.7)))
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
