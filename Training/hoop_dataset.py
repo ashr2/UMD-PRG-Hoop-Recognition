@@ -89,24 +89,25 @@ class HoopDataset(Dataset):
         #Get base hoop
         hoop_idx = idx % len(self.hoops)
         back_idx = int(idx / len(self.hoops)) % self.num_backgrounds
-
         hoop = Image.open(self.hoop_dir + "/" + self.hoops[hoop_idx])
+
         #Get base background
         background = Image.open(self.background_dir + "/" + self.backgrounds[back_idx])
-        hoop_back, hoop_black = add_hoop_to_background(background, hoop)
 
+        #Create image to be used for training
+        hoop_back, hoop_black = add_hoop_to_background(background, hoop)
         tf=transforms.Compose([
             transforms.ToTensor(),
             transforms.Resize((512,640)),
         ])
-
         hoop_back  = tf(hoop_back)
         hoop_black = tf(hoop_black)
         hoop_black = (hoop_black > 0).type(torch.float)
-
         data = (hoop_back, hoop_black)
         if self.transform is not None:
            data = [self.transform(item) for item in data]
+
+        #Add image to cache
         self.cache[idx] = (idx, *data)
 
         return idx, *data
