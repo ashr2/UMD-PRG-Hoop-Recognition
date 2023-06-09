@@ -67,7 +67,7 @@ def visualize_sample(image, pred_mask, mask, i):
     tensor = torch.from_numpy(vis_stack.transpose(2, 0, 1))
     return(tensor)
 
-NUM_EPOCHS = 1000
+NUM_EPOCHS = int(input("How many epochs do you want to run for (Recommended number is 750): "))
 IMG_DISPLAY_FREQ = 100
 for epoch in range(NUM_EPOCHS):
     #Training loop
