@@ -20,6 +20,8 @@ import encoder
 import cv2
 import torchvision
 
+#DEPRECATED MODULE
+
 def visualize_sample(image, pred_mask, mask, i):
     image_numpy     = image.detach().cpu().numpy().transpose(1, 2, 0)
     pred_mask_numpy = pred_mask.detach().cpu().numpy().transpose(1, 2, 0)
@@ -58,25 +60,25 @@ num_epochs = 250
 steps_per_print = 1
 for epoch in range(num_epochs):
     for i, (real_i, image, mask) in enumerate(dataloader):
-            image = image.to(device)
-            mask = mask.to(device)
+        image = image.to(device)
+        mask = mask.to(device)
 
-            optimizer.zero_grad()
-            pred_mask = autoencoder(image)
+        optimizer.zero_grad()
+        pred_mask = autoencoder(image)
 
-            image     = torchvision.transforms.functional.crop(image,     top=20, left=20, height=512-40, width=640-40)
-            pred_mask = torchvision.transforms.functional.crop(pred_mask, top=20, left=20, height=512-40, width=640-40)
-            mask      = torchvision.transforms.functional.crop(mask,      top=20, left=20, height=512-40, width=640-40)
-            weight = (mask * 10) + 1
+        image     = torchvision.transforms.functional.crop(image,     top=20, left=20, height=512-40, width=640-40)
+        pred_mask = torchvision.transforms.functional.crop(pred_mask, top=20, left=20, height=512-40, width=640-40)
+        mask      = torchvision.transforms.functional.crop(mask,      top=20, left=20, height=512-40, width=640-40)
+        weight = (mask * 10) + 1
 
-            loss = F.binary_cross_entropy(pred_mask, mask, weight=weight)
+        loss = F.binary_cross_entropy(pred_mask, mask, weight=weight)
 
-            loss.backward()
-            optimizer.step()
-            
-            if i % steps_per_print == 0:
-                visualize_sample(image[0], pred_mask[0], mask[0], real_i[0])
-                print("Epoch [{}/{}], Step [{}/{}], Loss: {}".format(epoch+1, num_epochs, i+1, len(dataloader), loss.item()))
+        loss.backward()
+        optimizer.step()
+        
+        if i % steps_per_print == 0:
+            visualize_sample(image[0], pred_mask[0], mask[0], real_i[0])
+            print("Epoch [{}/{}], Step [{}/{}], Loss: {}".format(epoch+1, num_epochs, i+1, len(dataloader), loss.item()))
      
 
 cv2.waitKey(0)
