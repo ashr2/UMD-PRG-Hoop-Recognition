@@ -71,6 +71,7 @@ class HoopDataset(Dataset):
         self.hoop_dir = hoop_dir
         self.hoops = sorted(os.listdir(hoop_dir))
         self.backgrounds = sorted(os.listdir(background_dir))
+        self.backgrounds.remove(".DS_Store")
         self.num_backgrounds = len(self.backgrounds)
         self.transform = transform
         self.cache = {} # TODO cache to disk instead of RAM

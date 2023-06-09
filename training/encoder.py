@@ -5,6 +5,8 @@ import hoop_dataset
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+
+#Autoencoder Module
 class AutoEncoder(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()

@@ -4,6 +4,7 @@ import os
 import numpy as np
 import sys
 import os
+import datetime
 #Pytorch modules
 import torch
 from torch import nn
@@ -11,6 +12,7 @@ from torch import optim
 import torch.nn.functional as F
 from torchvision import datasets, transforms, models
 from torch.utils.data import Dataset, DataLoader
+import tensorflow as tf
 #PIL modules
 from PIL import Image
 import hoop_dataset
@@ -39,7 +41,7 @@ if torch.cuda.is_available():
     pin_memory = True
 
 # Create dataset
-dataset = hoop_dataset.HoopDataset("../tests/hoops", "../assets/unlabeled2017")
+dataset = hoop_dataset.HoopDataset("../tests/hoops", "../assets/shortened_images")
 
 # Set batch size
 batch_size = 1
@@ -49,15 +51,13 @@ dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory
 
 # Set up autoencoder and optimizer
 autoencoder = encoder.AutoEncoder(in_channels=3, out_channels=1).to(device)
-
 optimizer = optim.Adam(autoencoder.parameters(), lr=0.0001)
 
 # Train autoencoder
-num_epochs = 500
+num_epochs = 250
 steps_per_print = 1
 for epoch in range(num_epochs):
     for i, (real_i, image, mask) in enumerate(dataloader):
-        try:
             image = image.to(device)
             mask = mask.to(device)
 
@@ -73,11 +73,12 @@ for epoch in range(num_epochs):
 
             loss.backward()
             optimizer.step()
-
+            
             if i % steps_per_print == 0:
                 visualize_sample(image[0], pred_mask[0], mask[0], real_i[0])
                 print("Epoch [{}/{}], Step [{}/{}], Loss: {}".format(epoch+1, num_epochs, i+1, len(dataloader), loss.item()))
-        except:
-            print("Error")
+     
 
 cv2.waitKey(0)
+log_dir = "./logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)

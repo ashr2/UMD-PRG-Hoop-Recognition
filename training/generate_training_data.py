@@ -5,9 +5,10 @@ import os
 import cv2
 
 def add_hoop_to_background(background_image, hoop_image):
-    BLACK_IMAGE_PATH = "/Users/ashwathrajesh/UMD-PRG-Hoop-Recognition/assets/black.jpg"
+    BLACK_IMAGE_PATH = "../assets/black.jpg"
     black_image = Image.open(BLACK_IMAGE_PATH)
 
+    #Randomize size of the hoop
     size = random.randint(100,min(background_image.size[1], background_image.size[0])//2)
     maxsize = (size, size)
     hoop_image.thumbnail(maxsize, PIL.Image.ANTIALIAS)
@@ -15,7 +16,7 @@ def add_hoop_to_background(background_image, hoop_image):
     #Paste hoop onto background
     x_center = random.randint(hoop_image.size[0], background_image.size[0] - hoop_image.size[0])
     y_center = random.randint(hoop_image.size[1], background_image.size[1] - hoop_image.size[1])
-    #im.paste(mouse, (40,40), mouse)
+    
     hoop_mask = hoop_image.convert("L")
     background_image.paste(hoop_image, (x_center, y_center), hoop_mask)
 
