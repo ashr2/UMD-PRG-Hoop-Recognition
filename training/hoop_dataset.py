@@ -16,8 +16,8 @@ from torch.utils.data import Dataset, DataLoader
 import PIL
 from PIL import Image
 #Transformation modules
-from transformations.generate_hoop_image import transform_image
-from transformations.generate_training_data import add_hoop_to_background
+from generate_hoop_image import transform_image
+from generate_training_data import add_hoop_to_background
 
 # def add_hoop_to_background(background_image, hoop_image):
 #     size = random.randint(100,min(background_image.size[1], background_image.size[0])//2)

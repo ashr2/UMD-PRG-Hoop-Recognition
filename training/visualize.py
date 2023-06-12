@@ -17,7 +17,8 @@ from torch.utils.data import Dataset, DataLoader, random_split
 import tensorflow as tf
 from torch.utils.tensorboard import SummaryWriter
 from PIL import Image
-
+from transformations.generate_hoop_image import *
+from transformations.generate_training_data import *
 #Initialize writer
 log_dir = "./logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 writer = SummaryWriter(log_dir=log_dir)
