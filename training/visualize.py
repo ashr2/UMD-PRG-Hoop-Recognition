@@ -99,6 +99,7 @@ for epoch in range(NUM_EPOCHS):
 
     #Validation loop
     total_loss = 0
+    curr_display = 0
     for i, (real_i, image, mask) in enumerate(validateloader):
         #Clear gradients and obtain predicted mask of current image
         image = image.to(device)
@@ -111,14 +112,17 @@ for epoch in range(NUM_EPOCHS):
         pred_mask = torchvision.transforms.functional.crop(pred_mask, top=20, left=20, height=512-40, width=640-40)
         mask = torchvision.transforms.functional.crop(mask,      top=20, left=20, height=512-40, width=640-40)
         weight = (mask * 10) + 1
-
-        #Display the first image in the validation set
-        if(i == 0):
-            writer.add_image('Test ' + str(epoch), visualize_sample(image[0], pred_mask[0], mask[0], real_i[0]), dataformats='CHW')
         
         #Add binary cross entropy loss of item to total loss of all items
         loss = F.binary_cross_entropy(pred_mask, mask, weight=weight)
         total_loss += loss
+
+        #Display the first image in the validation set until its loss is below 0.1.
+        #Switch to next when loss goes below 0.05
+        if(i == curr_display):
+            writer.add_image('Test ' + str(epoch), visualize_sample(image[0], pred_mask[0], mask[0], real_i[0]), dataformats='CHW')
+            if(loss < 0.05):
+                 curr_display = (curr_display + 1) % len(validation_set)
     #Write average loss of items in validation set to logs
     writer.add_scalar('Loss/Average Validation', total_loss/len(validateloader), epoch)
 writer.close()
